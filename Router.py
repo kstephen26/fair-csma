@@ -66,6 +66,10 @@ class Router(Node):
              elif self.status == 'Transmitting':
                  if self.transmissionStartTime + wan.tt + self.curTP < wan.cur_time:
                     # more random num sleep time logic needs to go here
+                    self.curReceiver = None
+                    self.transmissionStartTime = 0
+                    send_to = self.packet.mac
+                    self.packetCount+=1
                     self.send('RTS')
                     rec = self.receive()
                     if rec == 'CTS':
@@ -94,11 +98,14 @@ class Router(Node):
             self.send_to_access_point('RTS', 'START', idx)
             time.sleep(self.transmissionStartTime)
             self.send_to_access_point('RTS', 'DONE', idx)
-    
+            wan.router[idx].receivedPacketCount+=1
+
         elif packet == 'DATA':
             self.send_to_access_point('DATA', 'START', idx)
             time.sleep(self.transmissionStartTime)
             self.send_to_access_point('DATA', 'DONE', idx)
+            wan.router[idx].receivedPacketCount+=1
+
 
     def send_to_access_point(self, type, modififer=''):
         to_send = {
