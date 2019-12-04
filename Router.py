@@ -61,6 +61,7 @@ class Router(Node):
         while True:
             #will be randomly generated value here
             time.sleep(0.1)
+            k=0
             if self.status == 'Ready' and len(self.buffer)>0:
                 self.startTransmit(wan)
              elif self.status == 'Transmitting':
