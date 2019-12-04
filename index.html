@@ -1,0 +1,214 @@
+﻿<!-- Referenced Javascript, HTML and CSS documentations about shapes and tables -->
+<html>
+<head>
+
+<script language='javascript'>
+
+function loop()
+{
+	setInterval(function(){ sendRequest(); }, 100);
+	// sendRequest();
+}
+
+function loadTable(data) {
+    var table = document.getElementById("statusUpdateTable");
+    var properties = ['status', 'to', 'id', 'IP', 'MAC', 'collisionCount', 'packetCount', 'receivedPacketCount'];
+    var objs = ['A', 'B', 'R1', 'R2', 'R3', 'R4', 'C', 'D'];
+    
+    table.innerHTML = "";
+    var row = table.insertRow(0);
+    var cell = row.insertCell(0);
+    for (var i = 0; i < objs.length; i++){
+    	var cell = row.insertCell(i+1);
+    	cell.innerHTML = objs[i];
+    }
+
+    for (var i = 0; i < properties.length; i++){
+    	var property = properties[i];
+	    
+    	var row = table.insertRow(i+1);
+    	var cell = row.insertCell(0);
+    	cell.innerHTML = properties[i];
+    	for (var j = 0; j < objs.length; j++){
+	        var cell = row.insertCell(j+1);
+	        cell.innerHTML = data[objs[j]][property];
+
+		}
+	}
+}
+
+function loadCostTable(data)
+{
+	var table = document.getElementById("table2");
+	var objs = ['A', 'B', 'C', 'D', 'R1', 'R2', 'R3', 'R4'];
+
+	table.innerHTML = "";
+    var row = table.insertRow(0);
+    var cell = row.insertCell(0);
+    for (var i = 0; i < objs.length; i++){
+    	var cell = row.insertCell(i+1);
+    	cell.innerHTML = objs[i];
+    }
+
+    for (var i = 0; i < objs.length; i++){
+    	var obj = objs[i];
+	    
+    	var row = table.insertRow(i+1);
+    	var cell = row.insertCell(0);
+    	cell.innerHTML = obj;
+    	for (var j = 0; j < objs.length; j++){
+	        var cell = row.insertCell(j+1);
+	        cell.innerHTML = data['graph'][objs[i]][objs[j]];
+        }
+	}
+}
+
+function loadDijkstraTable(data)
+{
+	var table = document.getElementById("table3");
+	var routers = ['R1', 'R2', 'R3', 'R4'];
+	var nodes = ['A', 'B', 'C', 'D'];
+
+	table.innerHTML = "";
+    var row = table.insertRow(0);
+    var cell = row.insertCell(0);
+    for (var i = 0; i < nodes.length; i++){
+    	var cell = row.insertCell(i+1);
+    	cell.innerHTML = nodes[i];
+    }
+
+    for (var i = 0; i < routers.length; i++){
+    	var obj = routers[i];
+	    
+    	var row = table.insertRow(i+1);
+    	var cell = row.insertCell(0);
+    	cell.innerHTML = obj;
+    	for (var j = 0; j < nodes.length; j++){
+	        var cell = row.insertCell(j+1);
+	        cell.innerHTML = data[obj+"_route_table"][nodes[j]];
+        }
+	}
+}
+
+function setColour(status, to, container)
+{
+	if (status == "Transmitting")
+	{
+		container.style.background = '#008000';
+		container.innerHTML = to;
+	}
+	else if (status == 'Collision')
+	{
+		container.style.background = '#ff0000';
+		container.innerHTML = to;
+	}
+	else if (status == 'Waiting')
+	{
+		container.style.background = '#ffff00';
+		container.innerHTML = to;
+	}
+	else if (status == 'Ready')
+	{
+		container.style.background = '#909090';
+		container.innerHTML = "";
+	}
+}
+
+function controller(res)
+{
+	// alert(res.A.status);
+	setColour(res.A.status, res.A.to, document.getElementById("rectangle1"));
+	setColour(res.B.status, res.B.to, document.getElementById("rectangle3"));
+	setColour(res.C.status, res.C.to, document.getElementById("rectangle2"));
+	setColour(res.D.status, res.D.to, document.getElementById("rectangle4"));
+	setColour(res.R1.status, res.R1.to, document.getElementById("circle1"));
+	setColour(res.R2.status, res.R2.to, document.getElementById("circle3"));
+	setColour(res.R3.status, res.R3.to, document.getElementById("circle2"));
+	setColour(res.R4.status, res.R4.to, document.getElementById("circle4"));
+	loadTable(res);
+	document.getElementById("output").innerHTML = res['time'] + " mu-sec";
+	loadCostTable(res);
+	loadDijkstraTable(res);
+	for (var i=1; i<=4; i++)
+	{
+		document.getElementById("output"+i).innerHTML = String.fromCharCode(65+i-1) + " --->  " + res[String.fromCharCode(65+i-1)+"_throughput"];
+	}
+}
+
+function sendRequest()
+{
+	var xmlhttp = new XMLHttpRequest();
+    xmlhttp.overrideMimeType("application/json");
+    xmlhttp.onreadystatechange = function () {
+    	if (xmlhttp.readyState == 4) {
+            // alert("1");
+            var res = JSON.parse(xmlhttp.responseText);;
+            // alert(JSON.stringify(res.A.status));
+            // var res = xmlhttp.responseText;
+            controller(res);
+            // var jsonStr = JSON.stringify(res);
+            // alert(jsonStr);
+        }
+    };
+    xmlhttp.open("GET", "http://127.0.0.1:5002/", true);
+    xmlhttp.send();
+}
+
+</script>
+<link rel="stylesheet" type="text/css" href="stylee.css" media="screen" />
+
+</head>
+<body>
+<div>	
+	<div>
+		<div id="vertical-line1"><font size="4">BUS 1</font></div>
+		<div id="vertical-line2"><font size="4">BUS 2</font></div>
+		<div id="horizontal-line1"></div>
+		<div id="horizontal-line2"></div>
+		<div id="horizontal-line3"></div>
+		<div id="horizontal-line4"></div>
+		<div id="horizontal-line5"></div>
+		<div id="horizontal-line6"></div>
+		<div id="horizontal-line7"></div>
+		<div id="horizontal-line8"></div>
+		<div id="horizontal-line9"></div>
+		<div id="horizontal-line10"></div>
+		<div id="circle1"><font size="8">R1</font></div>
+		<div id="circle2"><font size="8">R3</font></div>
+		<div id="circle3"><font size="8">R2</font></div>
+		<div id="circle4"><font size="8">R4</font></div>
+		<div id="rectangle1"><font size="8">A</font></div>
+		<div id="rectangle2"><font size="8">C</font></div>
+		<div id="rectangle3"><font size="8">B</font></div>
+		<div id="rectangle4"><font size="8">D</font></div>
+		<div id="slanted-line"></div>
+		<div id="slanted-line1"></div>
+	</div>
+	<div>
+		<button type="button" onClick="loop()">Start</button>
+	</div>
+	<div id="extra">
+		<table id="statusUpdateTable">
+		</table>
+	</div>
+	<div id='output'>0 mu-sec</div>
+	<div id="costTable">
+		<table id="table2">
+		</table>
+	</div>
+	<div id="dijkstraTable">
+		<table id="table3">
+		</table>
+	</div>
+	<div id="buffers">
+		<div id='output1'>Throughput1</div>
+		<div id='output2'>Throughput2</div>
+		<div id='output3'>Throughput3</div>
+		<div id='output4'>Throughput4</div>
+	</div>
+	<div>
+</div>
+
+
+</body>
+</html>
