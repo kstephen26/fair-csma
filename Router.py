@@ -56,6 +56,28 @@ class Router(Node):
         elif self.status == 'Waiting' and self.backoffTime <= wan.cur_time:
             self.reStartTransmit(wan.cur_time)
 
+    def avoidanceRun(self):
+        while True:
+            #will be randomly generated value here
+            time.sleep(0.1)
+            if self.status == 'Ready' and len(self.buffer)>0:
+                self.startTransmit(wan)
+             elif self.status == 'Transmitting':
+                 if self.transmissionStartTime + wan.tt + self.curTP < wan.cur_time:
+                    # more random num sleep time logic needs to go here
+                    self.send('RTS')
+                    rec = self.receive()
+                    if rec == 'CTS':
+                        while rec is not 'ACK':
+                            self.send('DATA')
+                            rec = self.receive()
+                            break
+                    # tries 3 times to send
+                    if k >= 3:
+                        break
+                    k += 1
+
+
     def startTransmit(self, wan):
         self.packet = copy.deepcopy(self.buffer[0])
         del self.buffer[0]
@@ -65,8 +87,38 @@ class Router(Node):
         print("{} is sending to {}".format(self.id,self.curReceiver))
         self.status = 'Transmitting'
         self.transmissionStartTime = wan.cur_time
-        
     
+    def send(self, packet, idx):
+        if packet == 'RTS':
+            self.send_to_access_point('RTS', 'START', idx)
+            time.sleep(self.transmissionStartTime)
+            self.send_to_access_point('RTS', 'DONE', idx)
+    
+        elif packet == 'DATA':
+            self.send_to_access_point('DATA', 'START', idx)
+            time.sleep(self.transmissionStartTime)
+            self.send_to_access_point('DATA', 'DONE', idx)
+
+    def send_to_access_point(self, type, modififer=''):
+        to_send = {
+            'id': self.id,
+            'type': type,
+            'mod':modifier
+        }
+        wan.router[idx].add_packet(to_send)
+
+    def receive(self):
+        try:
+            message = self.packet.get()
+        except queue.Empty:
+            return None
+        if message == 'ACK':
+            return 'ACK'
+        elif message == 'NOACK':
+            return None
+        elif message == "NOCATS":
+            return None
+        return message
 
     def dijkstra(self, wan):
         class DijkstraNode:
