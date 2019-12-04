@@ -10,6 +10,7 @@ class Node(object):
         self.backoffTime = 0
         self.transmissionStartTime = 0
         self.curTP = 0
+        self.RTS_from = None
         self.receivedPacketCount = 0
 
     def startTransmit(self):
@@ -19,6 +20,9 @@ class Node(object):
         print("{} is sending to {}".format(self.id,self.curReceiver))
         self.status = "Transmitting"
         self.transmissionStartTime = cur_time
+
+    def sendCTS(self):
+        
 
     def stopTransmit(self, reason='Ready'):
         self.status = reason

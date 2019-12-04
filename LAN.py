@@ -16,7 +16,6 @@ class LAN:
             self.nodeList[i].operation(wan)
         print("-----------------------------------------------------")    
         self.coll_detect()
-        
 
     def coll_detect(self):
         collIndex = []
@@ -31,6 +30,12 @@ class LAN:
                         self.nodeList[i].stopTransmit("Collision")
                 else:
                     self.nodeList[i].stopTransmit("Collision")
+
+    def coll_avoid(self):
+        for i in range(4):
+            if self.nodeList[i].CTS_from != None:
+                self.nodeList[i].status = "Transmitting"
+                self.nodeList[i].sendCTS()
 
     def print_stat(self):
         for i in range(1, 5):

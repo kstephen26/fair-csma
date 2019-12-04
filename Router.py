@@ -7,7 +7,8 @@ class Router(Node):
     def __init__(self,id):
         super(Router, self).__init__(id)
         self.route_table = {}
-        self.packet = None
+        self.packet = (None,0)
+        self.packetSize = 10
         self.curReceiver = None
         self.transmissionStartTime = 0
         self.packetCount = 0
@@ -17,8 +18,11 @@ class Router(Node):
     def update_table(self):
         return
 
-    def add_packet(self, packet):
-        self.buffer.append(packet)
+    def add_packet(self, packet,packet_type):
+        if packet_type == 'RTS':
+            self.buffer.append((packet,2))
+        else:
+            self.buffer.append((packet,self.packetSize))
 
     def routing(self, packet):
         packet.mac = self.route_table[packet.ip]
@@ -37,9 +41,10 @@ class Router(Node):
                 self.transmissionStartTime = 0
                 send_to = self.packet.mac
                 self.packetCount+=1
+
                 if send_to.startswith('R'):
                     idx = int(send_to[-1])-1
-                    wan.router[idx].add_packet(self.packet)
+                    wan.router[idx].add_packet(self.packet,'RTS')
                     wan.router[idx].receivedPacketCount+=1
                 else:
                     idx = ord(send_to) - ord('A')
@@ -61,7 +66,7 @@ class Router(Node):
         self.status = 'Transmitting'
         self.transmissionStartTime = wan.cur_time
         
-
+    
 
     def dijkstra(self, wan):
         class DijkstraNode:
