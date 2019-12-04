@@ -50,6 +50,8 @@ class Router(Node):
                     idx = ord(send_to) - ord('A')
                     wan.host[idx].receivedPacketCount+=1
                 self.packet = None
+        elif self.status == 'Sending CTS':
+            
         elif self.status == 'Collision':
             self.calcBackoffTime(wan)
             self.status = 'Waiting'
@@ -128,6 +130,7 @@ class Router(Node):
         elif message == "NOCATS":
             return None
         return message
+
 
     def dijkstra(self, wan):
         class DijkstraNode:
