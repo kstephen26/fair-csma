@@ -57,6 +57,7 @@ class Router(Node):
             self.reStartTransmit(wan.cur_time)
 
     def avoidanceRun(self):
+        self.dijkstra(wan)
         while True:
             #will be randomly generated value here
             time.sleep(0.1)
